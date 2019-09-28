@@ -1,10 +1,59 @@
-# m35080_Read_BitBang
+# m35080_odometer_fix
 This default Skech now reads the full memory of EEPROM chips of the m35080 family like M35080, 08ODOWQ, M35080VP and 35080V6. </br> The read begins, after any kind of serial data is transmitted to the arduino (e.g just press the space bar and hit enter).
 
-Secure Incremental Memory rages from 0x00 till 0x1F</br>
-Standard Mempory ranges from 0x20 till 0x3FF
+Secure Incremental Memory ranges from 0x00 till 0x1F</br>
+Standard Memory ranges from 0x20 till 0x3FF
+
+## Fully refactored version
+
+I used this script to update VIN and mileage on IKE instrument cluster from junk yard. to retrofit it into my BMW E46.
+
+<u>Mileage on new cluser MUST be lower then mileage on your car!!!</u>
+
+Script will try to automatically find offset of VIN in EEPROM image. If this precedure fails, you'll need to modify code to disable *find_vin()* call, find VIN in EEPROM image and put offset to *vin_offs* variable.
+
+Set NEW_VIN and NEW_MILEAGE_KM to required values
+
+```
+#define NEW_VIN       "KP83884"
+#define NEW_MILAGE_KM xxxx // odometer value in KILOMETERS
+```
+
+For safety reasons I commented out write_odometer call. Uncomment it when you are absolutely sure!
+
+```
+//  write_odometer(NEW_MILAGE_KM);
+```
+
+I was able program m36080 chip in place, without removing it from PCB
+
+![IKE_6.932.903_3](doc/IKE_6.932.903_3.jpg)
+
+As m35080 chip uses +5V input voltage. Generic Android UNO used to drive it's pins and power.
+
+![IKE_6.932.903_1](doc/IKE_6.932.903_1.jpg)
+
+m35080 pinout
+
+![m35080_chip](doc/m35080_chip.jpg)
+
+Connect pins according to table
+
+| m35080 pin | Description       | Arduino UNO | Description |
+| :--------: | :---------------- | :---------: | ----------- |
+|     1      | Vss - ground      |     GND     |             |
+|     2      | S - chip sel      |     10      | SS          |
+|     3      | W - write protect |      9      | GPIO9       |
+|     4      | Q - data out      |     12      | MISO        |
+|     5      | not connected     |             |             |
+|     6      | C - clk           |     13      | SCK         |
+|     7      | D - data in       |     11      | MOSI        |
+|     8      | Vcc - +5V         |     5V      |             |
+
+
 
 ## Arduino
+
 I used an arduino micro, but any arduino which supports SPI is fine. Just switch the board in the arduino IDE.
 
 ## M35080 EEPROM
@@ -22,7 +71,7 @@ char val = 0x20;
 write_8(adr, val);
 ```
 
-or also 
+or also
 
 ```
 int adr = 0x2F1;
